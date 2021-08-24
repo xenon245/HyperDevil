@@ -22,8 +22,10 @@ import org.bukkit.event.player.PlayerToggleSneakEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.util.BoundingBox
+import org.bukkit.util.Vector
 import java.util.function.Predicate
 import kotlin.random.Random.Default.nextFloat
+import kotlin.random.Random.Default.nextInt
 
 class HyperDevilPlugin : JavaPlugin() {
     lateinit var fakeEntityServer: FakeEntityServer
@@ -32,7 +34,7 @@ class HyperDevilPlugin : JavaPlugin() {
 
     var toggled = false
 
-    var devil = Bukkit.getPlayerExact("devil0812")
+    var devil = Bukkit.getPlayer("xenon2452")
 
     override fun onEnable() {
         fakeProjectileManager = FakeProjectileManager()
@@ -70,8 +72,7 @@ class HyperDevilPlugin : JavaPlugin() {
         }
         @EventHandler
         fun onInteract(event: PlayerInteractEvent) {
-            if (event.player != devil) return
-            if (event.item?.type == Material.BLAZE_ROD) {
+            if (event.item?.type == Material.BLAZE_ROD && event.player.name == devil?.name) {
                 if(event.action != Action.RIGHT_CLICK_AIR && event.action == Action.RIGHT_CLICK_BLOCK) return
                 val fakeEntity = fakeEntityServer.spawnEntity(event.player.location, ArmorStand::class.java).apply {
                     updateMetadata<ArmorStand> {
@@ -89,8 +90,9 @@ class HyperDevilPlugin : JavaPlugin() {
         }
         @EventHandler
         fun onPlayerSneak(event: PlayerToggleSneakEvent) {
-            if (event.player != devil) return
-            toggled = event.player.itemInHand.type == Material.FLINT_AND_STEEL && event.isSneaking
+            if(event.player.name == devil?.name) {
+                toggled = event.player.itemInHand.type == Material.FLINT_AND_STEEL && event.isSneaking
+            }
         }
     }
 
@@ -131,7 +133,7 @@ class HyperDevilPlugin : JavaPlugin() {
 
                     val hitPosition = result.hitPosition
                     val hitLocation = hitPosition.toLocation(world)
-                    hitLocation.createExplosion(15.0F)
+
                 }
             }
 
@@ -170,20 +172,20 @@ class HyperDevilPlugin : JavaPlugin() {
     private fun playDevilBreath() {
         val player = devil ?: return
         val breathLoc = player.eyeLocation.clone().apply {
-            y += 0.5
+            y -= 0.1
         }
-        val vector = player.eyeLocation.direction.multiply(0.15)
+        val vector = player.eyeLocation.direction.multiply(1)
         val dx = vector.x
         val dy = vector.y
         val dz = vector.z
         val wiggle = 0.4
         for (i in 0 until 10) {
             player.world.spawnParticle(Particle.FLAME,
-                breathLoc.clone().add(vector),
+                breathLoc.clone().add(player.eyeLocation.direction.multiply(0.3)),
                 0,
-                dx + nextFloat() * wiggle - wiggle / 3.0,
-                dy + nextFloat() * wiggle - wiggle / 3.0,
-                dz + nextFloat() * wiggle - wiggle / 3.0,
+                dx + nextFloat() * wiggle - wiggle / 2.0,
+                dy + nextFloat() * wiggle - wiggle / 2.0,
+                dz + nextFloat() * wiggle - wiggle / 2.0,
                 0.5, null, true)
         }
 
@@ -195,7 +197,7 @@ class HyperDevilPlugin : JavaPlugin() {
             }
         }
 
-        player.eyeLocation.clone().add(vector).getNearbyLivingEntities(dx.times(4.0), dy.times(4.0), dz.times(4.0), filter).forEach { entity ->
+        player.eyeLocation.clone().add(vector).getNearbyLivingEntities(dx.times(8.0), dy.times(8.0), dz.times(8.0), filter).forEach { entity ->
             Bukkit.getScheduler().runTaskTimer(this@HyperDevilPlugin, BurnEntityScheduler(entity), 0L, 1L)
         }
     }
