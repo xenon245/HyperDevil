@@ -32,7 +32,7 @@ class HyperDevilPlugin : JavaPlugin() {
 
     var toggled = false
 
-    var devil = Bukkit.getPlayerExact("xenon2452")!!
+    var devil = Bukkit.getPlayerExact("devil0812")!!
 
     override fun onEnable() {
         fakeProjectileManager = FakeProjectileManager()
@@ -48,7 +48,7 @@ class HyperDevilPlugin : JavaPlugin() {
                 executes {
                     feedback(text().color(TextColor.color(194, 0, 0)).content("HyperDevil").build())
                     server.scheduler.runTaskTimer(plugin, HyperDevilScheduler(), 0L, 1L)
-                    entityEventManager.registerEvents(devil, HyperDevilListener())
+                    server.pluginManager.registerEvents(HyperDevilListener(), plugin)
                     Bukkit.getOnlinePlayers().forEach {
                         fakeEntityServer.addPlayer(it)
                     }
@@ -70,6 +70,7 @@ class HyperDevilPlugin : JavaPlugin() {
         }
         @EventHandler
         fun onInteract(event: PlayerInteractEvent) {
+            if (event.player != devil) return
             if (event.item?.type == Material.BLAZE_ROD) {
                 if(event.action != Action.RIGHT_CLICK_AIR && event.action == Action.RIGHT_CLICK_BLOCK) return
                 val fakeEntity = fakeEntityServer.spawnEntity(event.player.location, ArmorStand::class.java).apply {
@@ -88,6 +89,7 @@ class HyperDevilPlugin : JavaPlugin() {
         }
         @EventHandler
         fun onPlayerSneak(event: PlayerToggleSneakEvent) {
+            if (event.player != devil) return
             toggled = event.player.itemInHand.type == Material.FLINT_AND_STEEL && event.isSneaking
         }
     }
