@@ -32,7 +32,7 @@ class HyperDevilPlugin : JavaPlugin() {
 
     var toggled = false
 
-    var devil = Bukkit.getPlayerExact("devil0812")!!
+    var devil = Bukkit.getPlayerExact("devil0812")
 
     override fun onEnable() {
         fakeProjectileManager = FakeProjectileManager()
@@ -168,7 +168,7 @@ class HyperDevilPlugin : JavaPlugin() {
     }
 
     private fun playDevilBreath() {
-        val player = devil
+        val player = devil ?: return
         val breathLoc = player.eyeLocation.clone().apply {
             y += 0.5
         }
@@ -205,7 +205,7 @@ class HyperDevilPlugin : JavaPlugin() {
             fakeEntityServer.update()
             fakeProjectileManager.update()
             if (toggled) playDevilBreath()
-            if (devil.itemInHand.type != Material.FLINT_AND_STEEL) toggled = false
+            if (devil?.itemInHand?.type != Material.FLINT_AND_STEEL) toggled = false
         }
     }
 
